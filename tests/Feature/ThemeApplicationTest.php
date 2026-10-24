@@ -27,9 +27,9 @@ use Workbench\App\Models\User;
 class ThemeApplicationTest extends TestCase
 {
     /** primary-600 of the Dracula ladder (hue 295) and of the Nord ladder (hue 250). */
-    private const string DRACULA_600 = 'oklch(0.54 0.16 295)';
+    private const string DRACULA_600 = 'oklch(0.48 0.16 295)';
 
-    private const string NORD_600 = 'oklch(0.54 0.1 250)';
+    private const string NORD_600 = 'oklch(0.48 0.1 250)';
 
     private function choose(User $user, string $theme, ?string $color = null): void
     {

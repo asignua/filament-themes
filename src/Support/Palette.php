@@ -9,15 +9,19 @@ use InvalidArgumentException;
 
 /**
  * Shade palettes (50..950) in OKLCH from a hue and a chroma. The lightness ladder is fixed, which is what makes
- * the contrast guarantees: shade 600 always carries white text at WCAG AA (4.5:1) and the gray ladder keeps its
+ * the contrast guarantees: shade 600 (and its hover shade 500) always carry white text at WCAG AA (4.5:1) and the gray ladder keeps its
  * body-text pairs above AA in light and dark mode (both are covered by tests).
  */
 final class Palette
 {
-    /** Accent shades: 600 is the solid button background (white text), 500 its dark-mode hover. */
+    /**
+     * Accent shades. Filament picks a solid button's shades from the palette: 600 with 500 on hover, and only when
+     * BOTH take light text (a dark-text pass on 500 sends it to a pale 400 button). 500 must therefore stay at or
+     * below ~0.55, where white text still reaches 4.5:1 and dark text does not.
+     */
     private const array ACCENT_LIGHTNESS = [
-        50 => 0.975, 100 => 0.95, 200 => 0.9, 300 => 0.83, 400 => 0.74, 500 => 0.64,
-        600 => 0.54, 700 => 0.46, 800 => 0.39, 900 => 0.33, 950 => 0.25,
+        50 => 0.975, 100 => 0.95, 200 => 0.9, 300 => 0.83, 400 => 0.72, 500 => 0.55,
+        600 => 0.48, 700 => 0.41, 800 => 0.35, 900 => 0.29, 950 => 0.22,
     ];
 
     /** Share of the base chroma used by each accent shade. */
