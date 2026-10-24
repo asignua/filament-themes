@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Workbench\App\Providers;
 
+use Asignua\FilamentThemes\Themes\Nord;
 use Asignua\FilamentThemes\ThemesPlugin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -17,6 +19,8 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Workbench\App\Filament\Resources\Orders\OrderResource;
+use Workbench\App\Filament\Resources\Products\ProductResource;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -26,8 +30,11 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
+            ->brandName('Acme Packaging')
             ->login()
-            ->plugin(ThemesPlugin::make())
+            ->pages([Dashboard::class])
+            ->resources([ProductResource::class, OrderResource::class])
+            ->plugin(ThemesPlugin::make()->default(Nord::class)->navigation())
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,

@@ -10,6 +10,9 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // `workbench:build` runs Testbench's own users migration first; the workbench owns this table.
+        Schema::dropIfExists('users');
+
         Schema::create('users', function (Blueprint $table): void {
             $table->id();
             $table->string('name');
@@ -17,6 +20,28 @@ return new class extends Migration
             $table->string('password');
             $table->boolean('is_active')->default(true);
             $table->rememberToken();
+            $table->timestamps();
+        });
+
+        Schema::create('products', function (Blueprint $table): void {
+            $table->id();
+            $table->string('name');
+            $table->string('sku')->unique();
+            $table->string('category');
+            $table->decimal('price', 8, 2);
+            $table->unsignedInteger('stock')->default(0);
+            $table->boolean('is_active')->default(true);
+            $table->text('description')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('orders', function (Blueprint $table): void {
+            $table->id();
+            $table->string('number')->unique();
+            $table->string('customer');
+            $table->string('status');
+            $table->decimal('total', 10, 2);
+            $table->timestamp('placed_at')->nullable();
             $table->timestamps();
         });
     }

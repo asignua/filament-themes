@@ -1,4 +1,9 @@
 ## Filament Themes (asignua/filament-themes)
 
-- Register the plugin on the panel: `->plugin(Asignua\FilamentThemes\ThemesPlugin::make())`.
-- TODO: describe the public API, the one-line recipe and the traps a coding agent must know.
+- Successor of `hasnayeen/themes`; migrate by swapping the namespace to `Asignua\FilamentThemes\`. Register with `->plugin(ThemesPlugin::make())` - no middleware, no theme build step.
+- Install: `composer require asignua/filament-themes`, `php artisan filament-themes:install` (publishes the migration and runs `filament:assets`), `php artisan migrate`.
+- Fluent setters (per panel): `themes([...])`, `registerTheme([...], bool $override)`, `default(Nord::class)`, `defaultColor('emerald')`, `mode('user'|'global')`, `canChangeTheme(bool|Closure)` (alias `canViewThemesPage`), `userMenu()`, `navigation(group:, sort:)`, `colors([...])`, `customColor(bool)`, `icon()`.
+- A theme is a class implementing `Asignua\FilamentThemes\Contracts\Theme` (`getName()`, `getPath(): ?string`, `getThemeColor(): array`) or extending `Themes\PaletteTheme` (hue/chroma pairs, AA contrast by construction). Optional interfaces: `HasChangeableColor`, `CanModifyPanelConfig`, `HasOnlyDarkMode`, `HasOnlyLightMode`, `Filament\Support\Contracts\HasLabel`.
+- Do not use Tailwind classes in a theme stylesheet (the panel only has the classes it compiled); use Filament's `--primary-600` / `--gray-50` variables and scope the rules with `:root:has(meta[name='filament-theme'][content='<name>'])`. A stylesheet that uses `@layer` must begin with `@layer theme, base, components, utilities;`.
+- Storage is the `theme_settings` table by default (any authenticatable, global row included); `'storage' => 'users'` in `config/filament-themes.php` reads and writes `users.theme` / `users.theme_color` instead. The default mode is `user`; in `global` mode set a `canChangeTheme` gate.
+- Colours are resolved when the page renders (after the session starts). In tests, a second request in the same test needs fresh scoped instances (`$this->app->forgetScopedInstances()` and `FilamentColor::clearResolvedInstance(ColorManager::class)`), as a real request has.

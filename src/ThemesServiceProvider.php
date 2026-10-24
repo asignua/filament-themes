@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Asignua\FilamentThemes;
 
+use Asignua\FilamentThemes\Commands\InstallCommand;
+use Filament\Support\Assets\Css;
+use Filament\Support\Facades\FilamentAsset;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 
@@ -13,13 +16,25 @@ class ThemesServiceProvider extends PackageServiceProvider
 
     public function configurePackage(Package $package): void
     {
-        // Translations live in resources/lang/<locale>/filament-themes.php and are read as
-        // `__('filament-themes::filament-themes.<key>')`. Publish tag: `filament-themes-translations`.
+        // Translations: `__('filament-themes::filament-themes.<key>')`, publish tag `filament-themes-translations`.
+        // Config: publish tag `filament-themes-config`. Migration: tag `filament-themes-migrations`.
         $package->name(static::$name)
+            ->hasConfigFile()
             ->hasTranslations()
-            ->hasViews();
+            ->hasViews()
+            ->hasMigration('create_filament_themes_table')
+            ->hasCommand(InstallCommand::class);
+    }
 
-        // Add a config file only when the plugin really has options: create config/filament-themes.php and
-        // chain `->hasConfigFile()` here (publish tag `filament-themes-config`). Prefer fluent setters on the Plugin.
+    public function packageRegistered(): void
+    {
+        $this->app->singleton(ThemeStore::class);
+    }
+
+    public function packageBooted(): void
+    {
+        FilamentAsset::register([
+            Css::make('filament-themes', __DIR__.'/../resources/dist/filament-themes.css'),
+        ], 'asignua/filament-themes');
     }
 }
