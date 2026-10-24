@@ -1,0 +1,91 @@
+{
+    "base": "http://host.docker.internal:8775",
+    "login": {
+        "path": "/admin/login",
+        "email": "emma@example.com",
+        "password": "password"
+    },
+    "shots": [
+        {
+            "path": "/admin/themes",
+            "out": "picker.jpg"
+        },
+        {
+            "path": "/admin/themes",
+            "out": "cover-source.jpg",
+            "stamp": false
+        },
+        {
+            "path": "/admin/orders",
+            "out": "nord.jpg"
+        },
+        {
+            "path": "/admin/themes",
+            "actions": [
+                {
+                    "click": "text=Sunset"
+                },
+                {
+                    "wait": 1500
+                }
+            ]
+        },
+        {
+            "path": "/admin/orders",
+            "out": "sunset.jpg"
+        },
+        {
+            "path": "/admin/themes",
+            "out": "color.jpg",
+            "actions": [
+                {
+                    "eval": "window.scrollTo(0, document.body.scrollHeight)"
+                },
+                {
+                    "wait": 300
+                }
+            ]
+        },
+        {
+            "path": "/admin/themes",
+            "actions": [
+                {
+                    "click": "text=Dracula"
+                },
+                {
+                    "wait": 1500
+                }
+            ]
+        },
+        {
+            "path": "/admin/orders",
+            "out": "dracula-dark.jpg",
+            "theme": "dark"
+        },
+        {
+            "path": "/admin/themes",
+            "theme": "dark",
+            "actions": [
+                {
+                    "click": "text=Nord"
+                },
+                {
+                    "wait": 1500
+                }
+            ]
+        }
+    ],
+    "covers": [
+        {
+            "html": "../../scripts/art/cover.html",
+            "out": "cover.jpg",
+            "query": {
+                "title": "A panel that looks like yours",
+                "lead": "Theme and accent picker for Filament 5: six built-in themes for light and dark mode, per user or panel-wide \u2014 a successor of hasnayeen/themes.",
+                "chips": "6 themes, light & dark|Per user or global|Any accent colour|WCAG AA buttons",
+                "shot": "../../filament-themes/art/cover-source.jpg",
+                "crop": "680,150,2160,1230"
+            }
+        }
+    ]
+}

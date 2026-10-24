@@ -18,8 +18,21 @@ No JavaScript to build, no Tailwind safelist: a theme is a set of **colour palet
 
 ## Screenshots
 
-> Screenshots live in `art/` and are added at release time: `cover.jpg`, `picker.jpg` (the theme cards), `nord.jpg`,
-> `dracula-dark.jpg`, `sunset.jpg` (the same table and form in different themes), `color.jpg` (the primary colour picker).
+The theme picker: six built-in themes, each for light and dark mode:
+
+![The theme cards](https://raw.githubusercontent.com/asignua/filament-themes/main/art/picker.jpg)
+
+The same table in Nord, Sunset and Dracula (dark):
+
+![Nord](https://raw.githubusercontent.com/asignua/filament-themes/main/art/nord.jpg)
+
+![Sunset](https://raw.githubusercontent.com/asignua/filament-themes/main/art/sunset.jpg)
+
+![Dracula in dark mode](https://raw.githubusercontent.com/asignua/filament-themes/main/art/dracula-dark.jpg)
+
+Any accent colour — a Filament palette or your own hex:
+
+![The primary colour picker](https://raw.githubusercontent.com/asignua/filament-themes/main/art/color.jpg)
 
 ## Requirements
 
