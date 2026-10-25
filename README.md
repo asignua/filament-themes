@@ -2,7 +2,7 @@
 
 [![Stand With Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/badges/StandWithUkraine.svg)](https://stand-with-ukraine.pp.ua)
 
-<img class="filament-hidden" src="https://raw.githubusercontent.com/asignua/filament-themes/main/art/cover.jpg" alt="Filament Themes">
+<img class="filament-hidden" src="https://raw.githubusercontent.com/asignua/filament-themes/v1.0.0/art/cover.jpg" alt="Filament Themes">
 
 [![Tests](https://img.shields.io/github/actions/workflow/status/asignua/filament-themes/tests.yml?branch=main&label=tests)](https://github.com/asignua/filament-themes/actions/workflows/tests.yml)
 
@@ -21,19 +21,19 @@ No JavaScript to build, no Tailwind safelist: a theme is a set of **colour palet
 
 The theme picker: six built-in themes, each for light and dark mode:
 
-![The theme cards](https://raw.githubusercontent.com/asignua/filament-themes/main/art/picker.jpg)
+![The theme cards](https://raw.githubusercontent.com/asignua/filament-themes/v1.0.0/art/picker.jpg)
 
 The same table in Nord, Sunset and Dracula (dark):
 
-![Nord](https://raw.githubusercontent.com/asignua/filament-themes/main/art/nord.jpg)
+![Nord](https://raw.githubusercontent.com/asignua/filament-themes/v1.0.0/art/nord.jpg)
 
-![Sunset](https://raw.githubusercontent.com/asignua/filament-themes/main/art/sunset.jpg)
+![Sunset](https://raw.githubusercontent.com/asignua/filament-themes/v1.0.0/art/sunset.jpg)
 
-![Dracula in dark mode](https://raw.githubusercontent.com/asignua/filament-themes/main/art/dracula-dark.jpg)
+![Dracula in dark mode](https://raw.githubusercontent.com/asignua/filament-themes/v1.0.0/art/dracula-dark.jpg)
 
 Any accent colour — a Filament palette or your own hex:
 
-![The primary colour picker](https://raw.githubusercontent.com/asignua/filament-themes/main/art/color.jpg)
+![The primary colour picker](https://raw.githubusercontent.com/asignua/filament-themes/v1.0.0/art/color.jpg)
 
 ## Requirements
 

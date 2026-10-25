@@ -2,8 +2,7 @@
 
 All notable changes to `asignua/filament-themes` are documented here.
 
-## Unreleased
-
+## v1.0.0 - 2026-10-25
 - Initial release: the Themes page (cards with light and dark previews, primary colour swatches and a free `#rrggbb`),
   six built-in themes (Default, Nord, Dracula, Sunset, Ocean, Forest) with WCAG AA contrast guaranteed by tests, per-user or
   panel-wide choice, per-panel theme lists, a `canChangeTheme` gate, custom themes as plain PHP classes
