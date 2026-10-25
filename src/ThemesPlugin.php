@@ -6,6 +6,7 @@ namespace Asignua\FilamentThemes;
 
 use Asignua\FilamentThemes\Contracts\Theme;
 use Asignua\FilamentThemes\Pages\Themes as ThemesPage;
+use Asignua\FilamentThemes\Support\Palette;
 use Asignua\FilamentThemes\Themes\DefaultTheme;
 use Asignua\FilamentThemes\Themes\Dracula;
 use Asignua\FilamentThemes\Themes\Forest;
@@ -24,6 +25,7 @@ use Filament\Support\Facades\FilamentColor;
 use Filament\Support\Facades\FilamentView;
 use Filament\View\PanelsRenderHook;
 use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\HtmlString;
 use InvalidArgumentException;
 
@@ -45,7 +47,10 @@ class ThemesPlugin implements Plugin
 
     protected ?string $mode = null;
 
-    protected bool|Closure $canChangeTheme = true;
+    /** null = the default: everybody in `user` mode, nobody in `global` mode (one choice restyles the panel for all). */
+    protected bool|Closure|null $canChangeTheme = null;
+
+    protected bool $servingRegistered = false;
 
     protected bool $userMenu = true;
 
@@ -161,7 +166,7 @@ class ThemesPlugin implements Plugin
     /**
      * Who may open the page and change the theme. The closure may take `$user`.
      */
-    public function canChangeTheme(bool|Closure $condition): static
+    public function canChangeTheme(bool|Closure|null $condition): static
     {
         $this->canChangeTheme = $condition;
 
@@ -304,6 +309,10 @@ class ThemesPlugin implements Plugin
             return false;
         }
 
+        if ($this->canChangeTheme === null) {
+            return $this->getMode() !== 'global';
+        }
+
         return (bool) $this->evaluate($this->canChangeTheme, ['user' => $user], [Authenticatable::class => $user]);
     }
 
@@ -338,19 +347,66 @@ class ThemesPlugin implements Plugin
             ]);
         }
 
+        $this->assertDefaultColorIsOffered();
+
         // Stylesheets of custom themes are published by `filament:assets` like any plugin asset.
         $assets = [];
 
         foreach ($this->getThemes() as $name => $class) {
-            $path = $class::getPath();
+            $path = static::resolveThemePath($class);
 
-            if ($path !== null && is_file($path)) {
+            if ($path !== null) {
                 $assets[] = Css::make('filament-theme-'.$name, $path);
             }
         }
 
         if ($assets !== []) {
             $panel->assets($assets);
+        }
+    }
+
+    /**
+     * The absolute path of a theme's stylesheet, or null (with a log warning when a path is declared but is not a
+     * file). A relative path - hasnayeen/themes themes return Vite entries such as `resources/css/themes/x.css` -
+     * is resolved against `base_path()`.
+     *
+     * @param class-string<Theme> $class
+     */
+    public static function resolveThemePath(string $class): ?string
+    {
+        $path = $class::getPath();
+
+        if ($path === null || $path === '') {
+            return null;
+        }
+
+        if (!str_starts_with($path, '/') && !str_starts_with($path, '\\') && preg_match('~^[A-Za-z]:[\\\\/]~', $path) !== 1) {
+            $path = base_path($path);
+        }
+
+        if (!is_file($path)) {
+            Log::warning("filament-themes: the stylesheet [{$path}] of theme [{$class}] is not a file and was skipped. "
+                .'A theme CSS must be a plain, compiled .css file (a Vite/Tailwind source from hasnayeen/themes is not enough).');
+
+            return null;
+        }
+
+        return $path;
+    }
+
+    protected function assertDefaultColorIsOffered(): void
+    {
+        $color = $this->defaultColor;
+
+        if ($color === null) {
+            return;
+        }
+
+        $offered = Palette::isHex($color) ? $this->customColor : in_array($color, $this->getColors(), true);
+
+        if (!$offered) {
+            throw new InvalidArgumentException("The default colour [{$color}] is not offered: use one of the colors() names"
+                .($this->customColor ? ' or a #rrggbb' : ' (custom colours are switched off)').'.');
         }
     }
 
@@ -364,7 +420,12 @@ class ThemesPlugin implements Plugin
 
         $this->wrapDarkMode($panel);
 
-        Filament::serving(fn () => Filament::getCurrentPanel()?->getId() === $panel->getId() ? $this->manager()->applyPanelConfig() : null);
+        // The event dispatcher outlives the request under Octane: listen once, not on every boot.
+        if (!$this->servingRegistered) {
+            $this->servingRegistered = true;
+
+            Filament::serving(fn () => Filament::getCurrentPanel()?->getId() === $panel->getId() ? $this->manager()->applyPanelConfig() : null);
+        }
 
         FilamentView::registerRenderHook(
             PanelsRenderHook::HEAD_END,
@@ -384,12 +445,15 @@ class ThemesPlugin implements Plugin
 
         $this->darkModeWrapped = true;
 
-        $allowed = $panel->hasDarkMode();
-        $forced = $panel->hasDarkModeForced();
+        // Keep the panel's own settings as they are (bool or closure) and evaluate them on every call.
+        $read = fn (string $property): mixed => (fn (): mixed => $this->{$property})->call($panel);
+        $evaluate = fn (mixed $value): bool => (bool) (fn (): mixed => $this->evaluate($value))->call($panel);
+        $allowed = $read('hasDarkMode');
+        $forced = $read('hasDarkModeForced');
 
         $panel->darkMode(
-            fn (): bool => $this->manager()->isDarkOnly() || ($allowed && !$this->manager()->isLightOnly()),
-            fn (): bool => $forced || $this->manager()->isDarkOnly(),
+            fn (): bool => $this->manager()->isDarkOnly() || ($evaluate($allowed) && !$this->manager()->isLightOnly()),
+            fn (): bool => $evaluate($forced) || $this->manager()->isDarkOnly(),
         );
     }
 }

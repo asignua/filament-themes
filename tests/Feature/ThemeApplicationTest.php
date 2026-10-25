@@ -109,7 +109,7 @@ class ThemeApplicationTest extends TestCase
 
     public function test_global_mode_writes_the_panel_wide_row(): void
     {
-        ThemesPlugin::get()->mode('global');
+        ThemesPlugin::get()->mode('global')->canChangeTheme(true);
 
         \Livewire\Livewire::test(\Asignua\FilamentThemes\Pages\Themes::class)->call('selectTheme', 'ocean');
 

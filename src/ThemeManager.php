@@ -113,7 +113,11 @@ final class ThemeManager
         $colors = [];
 
         foreach ($theme->getThemeColor() as $name => $value) {
-            $colors[$name] = is_string($value) && Palette::isHex($value) ? Palette::fromHex($value) : $value;
+            $colors[$name] = match (true) {
+                is_string($value) && Palette::isHex($value) && $name === 'gray' => Palette::grayFromHex($value),
+                is_string($value) && Palette::isHex($value) => Palette::fromHex($value),
+                default => $value,
+            };
         }
 
         if ($theme instanceof HasChangeableColor) {
@@ -157,6 +161,8 @@ final class ThemeManager
 
     public function selectColor(?string $color): void
     {
+        $color = $color === null ? null : trim($color);
+
         if ($color !== null && $this->resolveColor($color) === null) {
             throw ValidationException::withMessages(['color' => __('filament-themes::filament-themes.invalid_color')]);
         }
@@ -181,6 +187,19 @@ final class ThemeManager
         $theme = $this->theme();
 
         if ($theme instanceof CanModifyPanelConfig) {
+            // The panel object outlives the request under Octane and a hook mutates it: put every property back
+            // when the request ends (shallow: objects the hook mutates in place are not restored).
+            $snapshot = (fn (): array => get_object_vars($this))->call($this->panel);
+            $panel = $this->panel;
+
+            app()->terminating(function () use ($panel, $snapshot): void {
+                (function () use ($snapshot): void {
+                    foreach ($snapshot as $property => $value) {
+                        $this->{$property} = $value;
+                    }
+                })->call($panel);
+            });
+
             $theme->modifyPanelConfig($this->panel);
         }
     }
@@ -205,7 +224,7 @@ final class ThemeManager
         $theme = app($this->plugin->getThemes()[$name]);
         $current = $name === $this->themeName();
         $colors = $current ? $this->colors() : $theme->getThemeColor();
-        $base = ColorManager::DEFAULT_COLORS;
+        $base = array_merge(ColorManager::DEFAULT_COLORS, $this->panel->getColors());
 
         $palette = function (string $color) use ($colors, $base): array {
             $value = $colors[$color] ?? $base[$color] ?? $base['gray'];

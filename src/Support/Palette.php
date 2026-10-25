@@ -87,9 +87,26 @@ final class Palette
         return self::accent((float) $hue, min((float) $chroma, 0.19));
     }
 
+    /**
+     * A neutral ladder from the hue of a hex colour; chroma is capped at 0.03 so a vivid hex cannot tint the whole
+     * panel (and the text pairs keep their contrast).
+     *
+     * @return array<int, string>
+     */
+    public static function grayFromHex(string $hex): array
+    {
+        if (!self::isHex($hex)) {
+            throw new InvalidArgumentException("[{$hex}] is not a #rrggbb colour.");
+        }
+
+        sscanf(Color::convertToOklch(strtolower($hex)), 'oklch(%f %f %f)', $lightness, $chroma, $hue);
+
+        return self::gray((float) $hue, min((float) $chroma, 0.03));
+    }
+
     public static function isHex(string $value): bool
     {
-        return preg_match('/^#[0-9a-fA-F]{6}$/', $value) === 1;
+        return preg_match('/^#[0-9a-fA-F]{6}\z/', $value) === 1;
     }
 
     private static function oklch(float $lightness, float $chroma, float $hue): string

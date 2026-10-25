@@ -10,7 +10,8 @@ A theme switcher for Filament 5. Users open **Themes** in the user menu, pick a 
 dark mode, and optionally replace its primary colour with a Filament colour or any `#rrggbb`. The choice is saved per user
 (or once for the whole panel) and applies on the next page. Six themes ship in the box - **Default, Nord, Dracula, Sunset,
 Ocean, Forest** - and your own is one small PHP class. It is the successor of `hasnayeen/themes`, which stopped before
-Filament 5, with the same plugin and contract names so most panels migrate by swapping a namespace.
+Filament 5, with the same plugin and contract names, so the PHP side of a panel migrates by swapping a namespace - but a theme's
+**stylesheet does not carry over** (see [Migrating](#migrating-from-hasnayeenthemes)).
 
 No JavaScript to build, no Tailwind safelist: a theme is a set of **colour palettes** that Filament already understands
 (`primary`, `gray`, `danger`, ...) plus an optional stylesheet, and the picker has its own namespaced CSS (`.fi-themes*`).
@@ -90,8 +91,9 @@ Every setter works per panel, so an `admin` panel and a `shop` panel can offer d
 | `user` (default) | each user | that user, in that panel |
 | `global` | whoever passes `canChangeTheme` | everybody, guests and the login page included |
 
-In `user` mode guests and the login page get the panel default. In `global` mode set a gate - the default lets every
-signed-in user change the look of the panel for everybody:
+In `user` mode guests and the login page get the panel default, and everybody signed in may change their own theme. In
+`global` mode **nobody may change it until you say who** (one choice restyles the panel for everybody, so it is deny by
+default):
 
 ```php
 ThemesPlugin::make()->mode('global')->canChangeTheme(fn ($user) => $user->is_admin);
@@ -128,7 +130,9 @@ Coming from `hasnayeen/themes`, keep your `users.theme` / `users.theme_color` co
 'storage' => 'users',
 ```
 
-The panel-wide `global` choice always uses the table.
+The panel-wide `global` choice always uses the table. Note that these two columns belong to the user, not to a panel:
+with `'storage' => 'users'` a user who has several panels with this plugin shares ONE choice between them (the table
+storage keeps a choice per panel).
 
 ## Built-in themes
 
@@ -151,7 +155,7 @@ ladder, which is what makes the contrast guaranteed instead of hoped for; unit t
 - links (`primary-600` on white, `primary-400` on `gray-900`);
 - the button of **any** colour a user types in, for every hue.
 
-A free-form colour is turned into a palette from its hue and chroma (chroma is capped, lightness is the ladder's), so a neon
+A colour given as a hex string - in `getThemeColor()` or typed by a user - is turned into a palette from its hue and chroma (chroma is capped, lightness is the ladder's), so a neon
 `#00ff00` cannot produce an unreadable button. Named Filament palettes are used as Filament ships them - and Filament itself
 picks a readable text shade for them.
 
@@ -217,9 +221,13 @@ panel**, so scope it to your theme. The plugin prints `<meta name="filament-them
 }
 ```
 
+A relative `getPath()` (hasnayeen themes return Vite entries such as `resources/css/themes/x.css`) is resolved against
+`base_path()`; a path that is not a file is skipped with a log warning. The file must be plain CSS: a Tailwind/PostCSS
+source is not compiled here.
+
 Use Filament's variables (`--primary-600`, `--gray-50`, `--danger-500`, ...), they carry the chosen palette and flip with dark mode.
 Do not use Tailwind classes in this file: the panel's stylesheet only contains the classes it compiled. If you use
-`@layer`, the file **must begin with `@layer theme, base, components, utilities;`**, otherwise Tailwind's preflight in the
+`@layer` (the built-in file does: everything is in `@layer components`, so a utility class such as `rounded-full` still wins), the file **must begin with `@layer theme, base, components, utilities;`**, otherwise Tailwind's preflight in the
 panel loses to your layer.
 
 ## Configuration
@@ -243,7 +251,10 @@ composer require asignua/filament-themes
 ```
 
 Replace `Hasnayeen\Themes\` with `Asignua\FilamentThemes\` in your imports and remove `SetTheme` from the panel's middleware
-(it is optional now, see below). To keep the existing choices run with `'storage' => 'users'`; to move to the table, copy
+(it is optional now, see below). **Your own theme classes keep working, but their CSS does not:** hasnayeen themes ship a
+Tailwind/PostCSS source compiled by your Vite build and scoped to its own markup. Rewrite it as plain CSS scoped with
+`:root:has(meta[name='filament-theme'][content='<name>'])` (see "The stylesheet"), or return `null` from `getPath()` and keep
+only the colours. To keep the existing choices run with `'storage' => 'users'`; to move to the table, copy
 `users.theme` / `users.theme_color` into `theme_settings` once.
 
 | `hasnayeen/themes` | `asignua/filament-themes` |
@@ -268,13 +279,18 @@ Replace `Hasnayeen\Themes\` with `Asignua\FilamentThemes\` in your imports and r
 
 ## Octane and long-lived workers
 
-The choice is read per request (memoised on the request, never on the plugin), and Filament's colour registry is request-scoped,
-so one user's colours cannot leak into the next request. The one thing that outlives a request is the panel object:
-`CanModifyPanelConfig::modifyPanelConfig()` mutates it, so set both states (`topNavigation($flag)`, not only
-`topNavigation()`), or leave panel-level changes out of themes under Octane.
+The choice is read per request (memoised on the request, never on the plugin) and Filament's colour registry is
+request-scoped, so one user's colours cannot leak into the next request. The one thing that outlives a request is the panel
+object, which `CanModifyPanelConfig::modifyPanelConfig()` mutates: the plugin takes a snapshot of the panel's properties
+before the hook and puts them back when the request terminates (a test runs two sequential requests). It is a shallow
+restore - an object the hook mutates in place (a plugin instance, say) is not restored - and it has been tested with
+sequential requests in one process, not under a real Octane server.
 
 ## Gotchas
 
+- **A hex given as the `gray` colour gets a neutral ladder** (hue kept, chroma capped at 0.03), every other hex an accent ladder
+  (chroma capped at 0.19). `defaultColor()` must be one of `colors()` or, with `customColor()` on, a `#rrggbb`; anything else
+  throws when the plugin is registered instead of being ignored silently.
 - **Colours are read when the page renders**, not when the plugin boots - the session is not started yet at boot. That is why no
   middleware is needed, and why a panel that renders colours before authentication (for example a custom login page that
   resolves `FilamentColor` early) shows the panel default.

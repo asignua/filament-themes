@@ -29,7 +29,7 @@ class SmokeTest extends TestCase
         $ids = array_map(fn ($asset) => $asset->getId(), FilamentAsset::getStyles(['asignua/filament-themes']));
 
         $this->assertSame(['filament-themes'], $ids);
-        $this->assertStringStartsNotWith('@layer', trim((string) file_get_contents(__DIR__.'/../../resources/dist/filament-themes.css')));
+        $this->assertStringStartsWith('@layer theme, base, components, utilities;', (string) file_get_contents(__DIR__.'/../../resources/dist/filament-themes.css'));
     }
 
     public function test_every_built_in_theme_has_a_label_and_a_description(): void

@@ -62,9 +62,13 @@ class ThemeStore
             return;
         }
 
-        ThemeSetting::query()->updateOrCreate(
-            ['panel_id' => $panelId, 'subject_type' => $type, 'subject_id' => $id],
-            ['theme' => $choice->theme, 'color' => $choice->color],
+        // One atomic statement: two simultaneous first saves cannot collide on the unique index.
+        $now = now();
+
+        ThemeSetting::query()->upsert(
+            [['panel_id' => $panelId, 'subject_type' => $type, 'subject_id' => $id, 'theme' => $choice->theme, 'color' => $choice->color, 'created_at' => $now, 'updated_at' => $now]],
+            ['panel_id', 'subject_type', 'subject_id'],
+            ['theme', 'color', 'updated_at'],
         );
     }
 
