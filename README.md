@@ -341,6 +341,15 @@ Seed the demo user and rows with `vendor/bin/testbench db:seed --class='Workbenc
 
 See [CHANGELOG.md](CHANGELOG.md).
 
+## More plugins by asign
+
+- [Rating](https://filamentphp.com/plugins/asign-rating) — star rating column, input and entry
+- [Record Lock](https://filamentphp.com/plugins/asign-record-lock) — stop two people editing the same record
+- [Translation Manager](https://filamentphp.com/plugins/asign-translation-manager) — edit and scan Laravel translations in the panel
+- [Toggle Icon Column](https://filamentphp.com/plugins/asign-toggle-icon-column) — clickable boolean icon column
+
+All plugins: <https://filamentphp.com/plugins?q=asign>
+
 ## License
 
 The MIT License (MIT). See [LICENSE.md](LICENSE.md).
