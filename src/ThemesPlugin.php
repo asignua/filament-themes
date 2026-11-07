@@ -446,11 +446,19 @@ class ThemesPlugin implements Plugin
         $this->darkModeWrapped = true;
 
         // Keep the panel's own settings as they are (bool or closure) and evaluate them on every call.
-        $read = fn (string $property): mixed => (fn (): mixed => $this->{$property})->call($panel);
+        $read = fn (string ...$names): mixed => (function () use ($names): mixed {
+            foreach ($names as $name) {
+                if (property_exists($this, $name)) {
+                    return $this->{$name};
+                }
+            }
+
+            return null;
+        })->call($panel);
         $evaluate = fn (mixed $value): bool => (bool) (fn (): mixed => $this->evaluate($value))->call($panel);
         $allowed = $read('hasDarkMode');
         // Filament 5.11.1 renamed this property; `^5.0` still allows the old name.
-        $forced = $read(property_exists($panel, 'isDarkModeForced') ? 'isDarkModeForced' : 'hasDarkModeForced');
+        $forced = $read('isDarkModeForced', 'hasDarkModeForced');
 
         $panel->darkMode(
             fn (): bool => $this->manager()->isDarkOnly() || ($evaluate($allowed) && !$this->manager()->isLightOnly()),
