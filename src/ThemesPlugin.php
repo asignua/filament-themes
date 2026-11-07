@@ -449,7 +449,8 @@ class ThemesPlugin implements Plugin
         $read = fn (string $property): mixed => (fn (): mixed => $this->{$property})->call($panel);
         $evaluate = fn (mixed $value): bool => (bool) (fn (): mixed => $this->evaluate($value))->call($panel);
         $allowed = $read('hasDarkMode');
-        $forced = $read('hasDarkModeForced');
+        // Filament 5.11.1 renamed this property; `^5.0` still allows the old name.
+        $forced = $read(property_exists($panel, 'isDarkModeForced') ? 'isDarkModeForced' : 'hasDarkModeForced');
 
         $panel->darkMode(
             fn (): bool => $this->manager()->isDarkOnly() || ($evaluate($allowed) && !$this->manager()->isLightOnly()),
