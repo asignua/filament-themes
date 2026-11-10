@@ -5,6 +5,7 @@ All notable changes to `asignua/filament-themes` are documented here.
 ## v1.1.0 - 2026-11-10
 
 - Requires Filament ^5.11.2; replaced deprecated Filament API calls: Requires Filament ^5.11.2; no deprecated Filament API is used (verified with phpstan-deprecation-rules).
+- Laravel 13 deprecations: the workbench panel uses `PreventRequestForgery` (with a `VerifyCsrfToken` fallback for Laravel 12). Laravel 12 is still supported.
 
 ## v1.0.1 - 2026-11-07
 - Fix: the panel crashed on boot on Filament 5.11.1 (`Undefined property: Filament\Panel::$hasDarkModeForced`), because Filament renamed the property to `$isDarkModeForced`. Both names are supported, tested on 5.9.0, 5.11.0 and 5.11.1.
