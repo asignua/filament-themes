@@ -1,10 +1,13 @@
 # Filament Themes
 
 [![Stand With Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/badges/StandWithUkraine.svg)](https://stand-with-ukraine.pp.ua)
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/asignua/filament-themes.svg?style=flat-square)](https://packagist.org/packages/asignua/filament-themes)
+[![Tests](https://img.shields.io/github/actions/workflow/status/asignua/filament-themes/tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/asignua/filament-themes/actions/workflows/tests.yml)
+[![Total Downloads](https://img.shields.io/packagist/dt/asignua/filament-themes.svg?style=flat-square)](https://packagist.org/packages/asignua/filament-themes)
+[![License](https://img.shields.io/packagist/l/asignua/filament-themes.svg?style=flat-square)](https://github.com/asignua/filament-themes/blob/main/LICENSE.md)
+[![Plumb score](https://plumbphp.dev/badges/asignua/filament-themes/composite.svg)](https://plumbphp.dev/asignua/filament-themes)
 
 <img class="filament-hidden" src="https://raw.githubusercontent.com/asignua/filament-themes/v1.0.0/art/cover.jpg" alt="Filament Themes">
-
-[![Tests](https://img.shields.io/github/actions/workflow/status/asignua/filament-themes/tests.yml?branch=main&label=tests)](https://github.com/asignua/filament-themes/actions/workflows/tests.yml)
 
 A theme switcher for Filament 5. Users open **Themes** in the user menu, pick a theme from cards that preview it in light and
 dark mode, and optionally replace its primary colour with a Filament colour or any `#rrggbb`. The choice is saved per user
@@ -349,6 +352,8 @@ See [CHANGELOG.md](CHANGELOG.md).
 - [Toggle Icon Column](https://filamentphp.com/plugins/asign-toggle-icon-column) — clickable boolean icon column
 
 All plugins: <https://filamentphp.com/plugins?q=asign>
+
+Catalogue of free and commercial plugins: <https://asign.tech/en/plugins>
 
 ## License
 
